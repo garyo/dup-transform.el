@@ -28,6 +28,31 @@ into this:
       pixel[x].b = bg->b;
     }
 ```
+or even:
+```c++
+      pixel[x].r = bg_pixel[0]; // red
+```
+
+into this:
+```c++
+      pixel[x].r = bg_pixel[0]; // red
+      pixel[x].g = bg_pixel[1]; // green
+      pixel[x].b = bg_pixel[2]; // blue
+      pixel[x].a = bg_pixel[3]; // alpha
+```
+
+with one keystroke.
+
+It also works with the region, if one is selected.
+
+## Installation
+
+It's not on MELPA yet, so if you're using `use-package` or one of its variants, just do something like this:
+```elisp
+(use-package dup-transform
+  :ensure (:host github :repo "garyo/dup-transform.el")
+)
+```
 
 ## Customization
 
