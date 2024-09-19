@@ -3,10 +3,11 @@
 ;; Copyright (C) 2024  Gary Oberbrunner
 
 ;; Author: Gary Oberbrunner <garyo@darkstarsystems.com>
-;; Keywords: lisp
+;; Maintainer: Gary Oberbrunner <garyo@darkstarsystems.com>
 ;; Version: 0.1.0
 ;; Package-Requires: ((emacs "27"))
-;; Keywords: graphics, programming
+;; Homepage: https://github.com/garyo/dup-transform.el
+;; Keywords: graphics, programming, c++, 3d, video, rgb
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
