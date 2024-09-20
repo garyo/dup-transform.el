@@ -49,7 +49,7 @@ It also works with the region, if one is selected.
 
 ## Cycling Words
 
-`dup-transform` also includes a command to "cycle" the word at point, if it's r/g/b/a, red/green/blue/alpha or x/y/z. Prefix arg cycles by that many elements; specifically `M-- M-x dup-transform` cycles backwards. This way you can copy/paste in the usual way, and quickly update the r/g/b/a symbols.
+`dup-transform` also includes a command `M-x dup-transform-cycle-word` to "cycle" the word at point, if it's r/g/b/a, red/green/blue/alpha or x/y/z. Prefix arg cycles by that many elements; specifically `M-- M-x dup-transform-cycle-word` cycles backwards. This way you can copy/paste in the usual way, and quickly update the r/g/b/a symbols.
 
 If you enable `dup-transform-mode`, a minor mode included with this package, it'll bind `dup-transform-cycle-word` to `C-c <up>` with an auto-repeat on `<up>` or `<down>` arrow keys.
 
