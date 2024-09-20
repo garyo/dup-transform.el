@@ -38,6 +38,8 @@
 
 ;;; Code:
 
+(require 'seq)
+
 (defgroup dup-tranform nil
   "Customizations for 'dup-transform'."
   :group 'applications
@@ -52,6 +54,21 @@
   "Default for `dup-transform' when the text doesn't look like RGB (e.g. xy(z)(w))."
   :type 'integer
   :group 'dup-transform)
+
+(defcustom dup-transform-cycle-keybinding "C-c <up>"
+  "Key to bind `dup-transform-cycle-word' to."
+  :type 'key
+  :group 'dup-transform
+  :set (lambda (symbol value)
+         ;; Unset the previous keybinding, if set
+         (when (boundp symbol)
+           (let ((old-key (symbol-value symbol)))
+             (when old-key
+               (keymap-global-unset old-key))))
+         (set-default symbol value)
+         (keymap-global-set value #'dup-transform-cycle-word))
+  :initialize 'custom-initialize-default
+  :require 'dup-transform)
 
 (defun dup-transform (n)
   "Duplicate the current region or line N times, replacing rgb/xyz instances.
@@ -109,6 +126,102 @@ Point should be on a `red' line to be repeated."
 ;; (unless foo
 ;;   (set foo.r a[0]) ;; red, from array.x
 ;;   )
+
+(defun dup-transform--get-word-at-point ()
+  "Get the word at point, along with its bounds."
+  (let ((word-bounds (bounds-of-thing-at-point 'word)))
+    (when word-bounds
+      (list (buffer-substring-no-properties (car word-bounds) (cdr word-bounds))
+            (car word-bounds)
+            (cdr word-bounds)))))
+
+(defun dup-transform--cycle-word (word-data n)
+  "Cycle the word given by WORD-DATA by N elements."
+  (let* ((word (car word-data))
+         (word-start (cadr word-data))
+         (word-end (nth 2 word-data))
+         (string-lists '(("r" "g" "b" "a")
+                         ("red" "green" "blue" "alpha")
+                         ("x" "y" "z")))
+         )
+    (catch 'found
+      (dolist (strings string-lists)
+        (let ((index (seq-position strings word #'equal)))
+          (when index
+            (let* ((next-index (mod (+ index n) (length strings)))
+                   (next-word (nth next-index strings)))
+              (save-excursion
+                (delete-region word-start word-end)
+                (insert next-word)))
+            (throw 'found t))))
+      nil))
+  )
+
+(defun dup-transform-cycle-word (n)
+  "Cycle the word at point to its Nth next value.
+Words should be r/g/b, red/green/blue, or x/y/z."
+  (interactive "p")
+  (let ((word-at-point (dup-transform--get-word-at-point)))
+    (when word-at-point
+      (dup-transform--cycle-word word-at-point n)
+      )
+    ))
+
+(defun dup-transform-cycle-word-back (n)
+  "Cycle the word at point N elements `backwards'; see `dup-transform-cycle-word'."
+  (interactive "p")
+  (dup-transform-cycle-word (- n)))
+
+;;; Test code: try C-c <up> on these, after setting up the bindings
+;; (set x green)
+;; (set y green)
+;; (set z blue)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Set up auto-repeat for repeat-mode
+
+(defvar dup-transform--repeat-keymap
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "<up>") #'dup-transform-cycle-word)
+    (define-key map (kbd "<down>") #'dup-transform-cycle-word-back)
+    map
+    )
+  "Keymap for repeatable `dup-transform' commands.")
+
+;; Make these commands repeatable
+(put #'dup-transform-cycle-word 'repeat-map 'dup-transform--repeat-keymap)
+(put #'dup-transform-cycle-word-back 'repeat-map 'dup-transform--repeat-keymap)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Set up minor mode
+
+(defvar dup-transform-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd dup-transform-cycle-keybinding) #'dup-transform-cycle-word)
+    map)
+  "Keymap for `dup-transform-mode`.")
+
+;;;###autoload
+(define-minor-mode dup-transform-mode
+  "A minor mode to cycle through word transformations."
+  :lighter " RGB"
+  :keymap dup-transform-mode-map
+  :global nil)
+
+;;;###autoload
+(defun dup-transform-mode-enable ()
+  "Enable `dup-transform-mode` in the current buffer."
+  (dup-transform-mode 1))
+
+;;;###autoload
+(defun dup-transform-mode-disable ()
+  "Disable `dup-transform-mode` in the current buffer."
+  (dup-transform-mode -1))
+
+;;;###autoload
+(define-globalized-minor-mode global-dup-transform-mode
+  dup-transform-mode dup-transform-mode-enable)
+
 
 (provide 'dup-transform)
 ;;; dup-transform.el ends here
