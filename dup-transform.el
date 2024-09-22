@@ -5,9 +5,9 @@
 ;; Author: Gary Oberbrunner <garyo@darkstarsystems.com>
 ;; Maintainer: Gary Oberbrunner <garyo@darkstarsystems.com>
 ;; Version: 0.2.0
-;; Package-Requires: ((emacs "27"))
+;; Package-Requires: ((emacs "29.1"))
 ;; Homepage: https://github.com/garyo/dup-transform.el
-;; Keywords: graphics, programming, c++, 3d, video, rgb
+;; Keywords: graphics, tools, convenience, c++, 3d, video, rgb
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@
 
 (require 'seq)
 
-(defgroup dup-tranform nil
+(defgroup dup-transform nil
   "Customizations for 'dup-transform'."
   :group 'applications
   :prefix "dup-transform-")
@@ -94,8 +94,7 @@ Point should be on a `red' line to be repeated."
          (color-patterns1 '(".r" ".g" ".b" ".a"))
          (color-patterns2 '("->r" "->g" "->b" "->a"))
          (color-name-patterns '("red" "green" "blue" "alpha"))
-         (text-ends-with-newline (string-suffix-p "\n" text))
-         )
+         (text-ends-with-newline (string-suffix-p "\n" text)))
     (dotimes (i n)
       (let ((modified-text text))
         ;; Replace patterns
@@ -113,12 +112,10 @@ Point should be on a `red' line to be repeated."
         (if text-ends-with-newline
             (insert modified-text)
           (insert "\n" modified-text))
-        (setq end (point))
-        ))
+        (setq end (point))))
     ;; move to start of next line
     (unless text-ends-with-newline
-      (forward-char 1))
-    ))
+      (forward-char 1))))
 
 ;;; Test code; try on these lines/regions
 ;; (set foo.x a[0]) ;; xy only
@@ -142,8 +139,7 @@ Point should be on a `red' line to be repeated."
          (word-end (nth 2 word-data))
          (string-lists '(("r" "g" "b" "a")
                          ("red" "green" "blue" "alpha")
-                         ("x" "y" "z")))
-         )
+                         ("x" "y" "z"))))
     (catch 'found
       (dolist (strings string-lists)
         (let ((index (seq-position strings word #'equal)))
@@ -154,8 +150,7 @@ Point should be on a `red' line to be repeated."
                 (delete-region word-start word-end)
                 (insert next-word)))
             (throw 'found t))))
-      nil))
-  )
+      nil)))
 
 (defun dup-transform-cycle-word (n)
   "Cycle the word at point to its Nth next value.
@@ -163,9 +158,7 @@ Words should be r/g/b, red/green/blue, or x/y/z."
   (interactive "p")
   (let ((word-at-point (dup-transform--get-word-at-point)))
     (when word-at-point
-      (dup-transform--cycle-word word-at-point n)
-      )
-    ))
+      (dup-transform--cycle-word word-at-point n))))
 
 (defun dup-transform-cycle-word-back (n)
   "Cycle the word at point N elements `backwards'; see `dup-transform-cycle-word'."
@@ -184,8 +177,7 @@ Words should be r/g/b, red/green/blue, or x/y/z."
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "<up>") #'dup-transform-cycle-word)
     (define-key map (kbd "<down>") #'dup-transform-cycle-word-back)
-    map
-    )
+    map)
   "Keymap for repeatable `dup-transform' commands.")
 
 ;; Make these commands repeatable
